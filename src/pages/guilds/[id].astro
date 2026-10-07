@@ -1,0 +1,43 @@
+---
+import Base from '../../layouts/Base.astro';
+import PatternTable from '../../components/PatternTable.astro';
+import { GUILDS, type Guild } from '../../lib/guilds';
+import { allPatterns, href } from '../../lib/site';
+
+export function getStaticPaths() {
+  return GUILDS.map((g) => ({ params: { id: g.id }, props: { guild: g } }));
+}
+
+const { guild } = Astro.props as { guild: Guild };
+const patterns = allPatterns().filter((p) => p.guild === guild.id);
+const order = { agent: 0, persona: 1, skill: 2 } as const;
+patterns.sort((a, b) => order[a.type] - order[b.type] || a.number.localeCompare(b.number));
+---
+
+<Base title={`${guild.name}' Guild`} description={`AI agents, skills and personas for ${guild.audience.toLowerCase()}: ${guild.covers.toLowerCase()}.`} current="guilds">
+  <section class="band section">
+    <div class="wrap">
+      <p class="eyebrow"><a href={href('guilds/')}>Guilds</a> / {guild.code}</p>
+      <h1 class="display" style="margin: 12px 0 20px; font-size: clamp(40px, 6vw, 72px)">{guild.name}' Guild</h1>
+      <p class="lede">For {guild.audience.toLowerCase()}. {guild.covers}.</p>
+      {guild.requiresBoundaries && (
+        <p class="note" style="margin-top: 24px; max-width: 640px">
+          Every agent and persona here states its boundaries: it supports a qualified professional, never replaces one, and never asks for identifying details.
+        </p>
+      )}
+    </div>
+  </section>
+  <section class="section">
+    <div class="wrap">
+      {patterns.length > 0 ? (
+        <PatternTable patterns={patterns} showGuild={false} caption={`${guild.name} patterns`} />
+      ) : (
+        <div class="panel"><p class="empty">No patterns yet. <a href={href('contribute/')}>Write the first one</a>.</p></div>
+      )}
+      <div class="cta-row" style="margin-top: 48px">
+        <p class="lede" style="margin: 0">Do this work every day? Your know-how belongs here.</p>
+        <a class="btn btn-accent" href={href('contribute/')}>Add a {guild.name.toLowerCase().replace(/s$/, '')} pattern</a>
+      </div>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro';
+import { allPatterns, href, REPO_URL } from '../lib/site';
+
+const all = allPatterns();
+const next = String(Math.max(0, ...all.map((p) => Number(p.number))) + 1).padStart(4, '0');
+const template = `---
+name: your-skill-name
+description: What it does, and when someone should use it.
+license: CC-BY-4.0
+metadata:
+  number: "${next}"
+  title: Your Skill Name
+  guild: teachers
+  master: Your Name
+  hallmark: ""
+  tags: one, two
+  languages: en
+---
+
+# Your Skill Name
+
+One or two sentences on the job this does.
+
+## Ask first
+
+- What the AI must know before starting.
+
+## Steps
+
+1. The first thing you would do, as you would explain it to a new colleague.
+2. The next thing.
+
+## Output
+
+What the finished answer looks like.
+
+## Check before replying
+
+- The mistakes a beginner makes, as checks.
+`;
+---
+
+<Base title="Contribute" description="Write a Guild pattern from your own work. Your name goes on every copy." current="contribute">
+  <section class="band section">
+    <div class="wrap">
+      <p class="eyebrow">Become a Master</p>
+      <h1 class="display" style="margin: 12px 0 20px; font-size: clamp(40px, 6vw, 72px)">Your job has a manual nobody wrote. Write it.</h1>
+      <p class="lede">Masters write patterns from their own work. Your name stays on every copy, fork and remix.</p>
+    </div>
+  </section>
+
+  <section class="band section">
+    <div class="wrap prose" style="max-width: 860px">
+      <h2 style="margin-top: 0">How to add a pattern</h2>
+      <ol>
+        <li>Pick the job. One skill does one job well; start there before writing an agent.</li>
+        <li>Copy the template below into <code>patterns/&lt;guild&gt;/&lt;your-skill-name&gt;/SKILL.md</code>. The next free number is <strong>{next}</strong>.</li>
+        <li>Write the steps the way you would teach a new colleague. Be specific about what good looks like.</li>
+        <li>Try it in two different AIs with three real requests, and fix what goes wrong.</li>
+        <li>Open a pull request. The checker runs automatically; fix anything it flags.</li>
+      </ol>
+      <p>Not on GitHub? <a href={`${REPO_URL}/issues/new?title=Pattern%20idea%3A%20`}>Open an issue</a> with your steps in plain text and a maintainer will turn it into a pattern with your name on it.</p>
+
+      <div class="part" style="margin-top: 24px">
+        <div class="part-head"><span class="part-label">SKILL.md template</span></div>
+        <pre>{template}</pre>
+      </div>
+
+      <h2 id="hallmark">The Hallmark checklist</h2>
+      <p>A pattern earns the Hallmark when two reviewers have checked all of these. One of them must work in the guild's profession for Healers' Guild patterns.</p>
+      <ul>
+        <li>It does one clear job, and the description says when to use it.</li>
+        <li>It asks for missing information instead of inventing it.</li>
+        <li>It never asks for names, IDs or other identifying details about patients, clients or children.</li>
+        <li>Professional patterns say they support a professional and do not replace one.</li>
+        <li>It was tried in at least two AIs, and the output was good enough to use.</li>
+        <li>Nothing in it would embarrass the person using it if their client or boss read it.</li>
+        <li>The automated checker passes.</li>
+      </ul>
+
+      <h2 id="new-guild">Proposing a new guild</h2>
+      <p>Open an issue with the profession, who it serves, and three skills you would want on day one. A guild opens once it has three reviewed patterns and one reviewer from that profession.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap cta-row">
+      <h2>Ready?</h2>
+      <div class="btn-row">
+        <a class="btn btn-accent" href={`${REPO_URL}/new/main/patterns`}>Add a file on GitHub</a>
+        <a class="btn" href={href('spec/')}>Read the spec</a>
+      </div>
+    </div>
+  </section>
+</Base>

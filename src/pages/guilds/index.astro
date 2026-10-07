@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import { allPatterns, guildCounts, guildHref, href } from '../../lib/site';
+
+const guilds = guildCounts(allPatterns());
+---
+
+<Base title="Guilds" description="Browse Guild patterns by profession: teachers, healers, builders, makers, merchants and heralds." current="guilds">
+  <section class="band section">
+    <div class="wrap">
+      <p class="eyebrow">02 — Guilds</p>
+      <h1 class="display" style="margin: 12px 0 20px; font-size: clamp(40px, 6vw, 72px)">Find your craft.</h1>
+      <p class="lede">Every pattern in a guild is written by, or with, someone who does that job.</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="wrap">
+      <div class="grid-boxes">
+        {guilds.map((g) => (
+          <a class="grid-box" href={guildHref(g.id)}>
+            <span class="eyebrow">{g.code}</span>
+            <h2 class="h3" style="margin-top: 12px">{g.name}</h2>
+            <p>{g.audience}</p>
+            <p class="count">{g.count} {g.count === 1 ? 'pattern' : 'patterns'} · {g.covers}</p>
+          </a>
+        ))}
+        <a class="grid-box" href={href('contribute/#new-guild')} style="background: var(--paper)">
+          <span class="eyebrow">G-??</span>
+          <h2 class="h3" style="margin-top: 12px">Your profession</h2>
+          <p>Lawyers, accountants, founders, students… propose the next guild.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,35 @@
+---
+import Base from '../../layouts/Base.astro';
+import PatternTable from '../../components/PatternTable.astro';
+import { PLATFORMS, exportFor, type PlatformId } from '../../lib/exporters';
+import { allPatterns, bundleFor, href } from '../../lib/site';
+
+export function getStaticPaths() {
+  return PLATFORMS.map((p) => ({ params: { platform: p.id }, props: { id: p.id } }));
+}
+
+const { id } = Astro.props as { id: PlatformId };
+const meta = PLATFORMS.find((p) => p.id === id)!;
+const all = allPatterns();
+const sample = exportFor(id, bundleFor(all[0], all));
+const list = id === 'coding' || id === 'hermes' ? all.filter((p) => p.type !== 'persona') : all;
+---
+
+<Base title={`Guild for ${meta.name}`} description={`Copy ready-made agents, skills and personas into ${meta.name}. Written by working professionals, free and open source.`}>
+  <section class="band section">
+    <div class="wrap">
+      <p class="eyebrow"><a href={href('patterns/')}>Index</a> / For {meta.name}</p>
+      <h1 class="display" style="margin: 12px 0 20px; font-size: clamp(40px, 6vw, 72px)">Guild for {meta.name}.</h1>
+      <p class="lede">Every pattern below has a {meta.name} version, shaped for how {meta.name} works{meta.limit ? `, including its ${meta.limit.toLocaleString('en')}-character limit` : ''}. Open one and choose {meta.name} under Copy for.</p>
+      <div class="panel" style="margin-top: 32px; max-width: 640px">
+        <h2 class="panel-title">How it works in {meta.name}</h2>
+        <div class="panel-body"><ol class="steps" style="margin: 0">{sample.steps.map((s) => <li>{s}</li>)}</ol></div>
+      </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="wrap">
+      <PatternTable patterns={list} caption={`Patterns for ${meta.name}`} />
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,91 @@
+---
+import Base from '../../layouts/Base.astro';
+import PatternTable from '../../components/PatternTable.astro';
+import { GUILDS } from '../../lib/guilds';
+import { allPatterns } from '../../lib/site';
+
+const all = allPatterns();
+---
+
+<Base title="The index" description={`All ${all.length} Guild patterns: copyable AI agents, skills and personas for teachers, doctors, developers, designers, sellers and marketers.`} current="index">
+  <section class="band section">
+    <div class="wrap">
+      <p class="eyebrow">01 — The index</p>
+      <h1 class="display" style="margin: 12px 0 20px; font-size: clamp(40px, 6vw, 72px)">Every pattern, numbered.</h1>
+      <p class="lede">Pick one, copy it into the AI you use. Agents bundle a persona and skills; skills do one job; personas set the voice.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <form class="filters" role="search" style="margin-bottom: 24px" data-filters>
+        <div class="field">
+          <label for="q">Search</label>
+          <input class="input" id="q" name="q" type="search" placeholder="profession, task or tag" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="guild">Guild</label>
+          <select class="select" id="guild" name="guild">
+            <option value="">All guilds</option>
+            {GUILDS.map((g) => <option value={g.id}>{g.name}</option>)}
+          </select>
+        </div>
+        <div class="field">
+          <label for="type">Type</label>
+          <select class="select" id="type" name="type">
+            <option value="">All types</option>
+            <option value="agent">Agents</option>
+            <option value="skill">Skills</option>
+            <option value="persona">Personas</option>
+          </select>
+        </div>
+        <p class="mono muted" style="margin: 0 0 12px" aria-live="polite" data-count>{all.length} patterns</p>
+      </form>
+
+      <PatternTable patterns={all} caption="All patterns" id="all-patterns" />
+      <p class="empty" hidden data-empty>
+        Nothing matches yet. <a href="../contribute/">Write the first one</a>.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-filters]')!;
+  const rows = [...document.querySelectorAll<HTMLTableRowElement>('#all-patterns tbody tr')];
+  const count = document.querySelector<HTMLElement>('[data-count]')!;
+  const empty = document.querySelector<HTMLElement>('[data-empty]')!;
+  const q = form.elements.namedItem('q') as HTMLInputElement;
+  const guild = form.elements.namedItem('guild') as HTMLSelectElement;
+  const type = form.elements.namedItem('type') as HTMLSelectElement;
+
+  // Filters live in the URL so a filtered index can be shared: /patterns/?guild=teachers&type=skill
+  const params = new URLSearchParams(location.search);
+  q.value = params.get('q') ?? '';
+  guild.value = params.get('guild') ?? '';
+  type.value = params.get('type') ?? '';
+
+  const apply = () => {
+    const words = q.value.toLowerCase().split(/\s+/).filter(Boolean);
+    let shown = 0;
+    for (const row of rows) {
+      const ok =
+        (!guild.value || row.dataset.guild === guild.value) &&
+        (!type.value || row.dataset.type === type.value) &&
+        words.every((w) => row.dataset.search!.includes(w));
+      row.hidden = !ok;
+      if (ok) shown++;
+    }
+    count.textContent = `${shown} ${shown === 1 ? 'pattern' : 'patterns'}`;
+    empty.hidden = shown > 0;
+    const next = new URLSearchParams();
+    if (q.value) next.set('q', q.value);
+    if (guild.value) next.set('guild', guild.value);
+    if (type.value) next.set('type', type.value);
+    history.replaceState(null, '', next.size ? `?${next}` : location.pathname);
+  };
+
+  form.addEventListener('input', apply);
+  form.addEventListener('submit', (e) => e.preventDefault());
+  apply();
+</script>

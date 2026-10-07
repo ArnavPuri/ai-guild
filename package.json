@@ -1,0 +1,29 @@
+{
+  "name": "ai-guild",
+  "version": "0.1.0",
+  "description": "Guild — an open library of copyable AI agents, skills and personas, written by people who do the work.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "npm run check:patterns && astro build",
+    "preview": "astro preview",
+    "test": "vitest run",
+    "check:patterns": "tsx scripts/check-patterns.ts"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "astro": "^7.3.6",
+    "gray-matter": "^4.0.3",
+    "marked": "^18.1.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  },
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  }
+}

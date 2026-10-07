@@ -1,0 +1,112 @@
+---
+import Base from '../layouts/Base.astro';
+import PatternTable from '../components/PatternTable.astro';
+import { getGuild } from '../lib/guilds';
+import { allPatterns, guildCounts, guildHref, href, patternHref, REPO_URL, TYPE_LABEL } from '../lib/site';
+
+const all = allPatterns();
+const featured = all.find((p) => p.type === 'agent') ?? all[0];
+const latest = all.slice(0, 6);
+const guilds = guildCounts(all);
+const agents = all.filter((p) => p.type === 'agent').length;
+const skills = all.filter((p) => p.type === 'skill').length;
+const personas = all.filter((p) => p.type === 'persona').length;
+
+const frontmatter = [
+  '---',
+  `name: ${featured.name}`,
+  `guild: ${featured.guild}`,
+  `type: ${featured.type}`,
+  'runs on: chatgpt, claude, gemini, grok, openclaw, hermes',
+  '---',
+].join('\n');
+---
+
+<Base>
+  <section class="band">
+    <div class="wrap split">
+      <div>
+        <p class="eyebrow" style="margin-bottom: 24px">Vol. 01 — Edition 2026 — Free, forever</p>
+        <h1 class="display">Hire an AI that already knows your job.</h1>
+        <p class="lede" style="margin-top: 28px">
+          Field-tested agents, skills and personas from working teachers, doctors, sellers and builders. Copy one. Paste it into the AI you already use.
+        </p>
+        <div class="btn-row" style="margin-top: 36px">
+          <a class="btn btn-accent" href={href('patterns/')}>Browse the index</a>
+          <a class="btn mono" href={href('spec/')}>Read the spec</a>
+        </div>
+        <p class="eyebrow" style="margin-top: 28px">{agents} agents · {skills} skills · {personas} personas</p>
+      </div>
+      <div>
+        <article class="card" aria-labelledby="featured-title">
+          <div class="card-head"><span>PATTERN No. {featured.number}</span><span>{TYPE_LABEL[featured.type].toUpperCase()}</span></div>
+          <div class="card-body">
+            <p class="eyebrow">{getGuild(featured.guild).name}' Guild</p>
+            <h2 id="featured-title" class="h3" style="margin: 8px 0 12px; font-size: 36px"><a href={patternHref(featured)} style="text-decoration: none">{featured.title}</a></h2>
+            <p style="margin: 0 0 20px; color: var(--ink-2)">{featured.description}</p>
+            <dl class="meta">
+              {featured.persona && (<><dt>Persona</dt><dd>{featured.persona}</dd></>)}
+              {featured.skills.length > 0 && (<><dt>Skills</dt><dd>{featured.skills.length}</dd></>)}
+              <dt>Master</dt><dd>{featured.master}</dd>
+              <dt>Hallmark</dt><dd>{featured.hallmark ? `Reviewed ${featured.hallmark}` : 'Awaiting review'}</dd>
+            </dl>
+          </div>
+          <pre class="frontmatter card-foot">{frontmatter}</pre>
+          <div class="seg card-foot">
+            <a href={patternHref(featured) + '#copy-chatgpt'}>ChatGPT</a>
+            <a href={patternHref(featured) + '#copy-claude'}>Claude</a>
+            <a href={patternHref(featured) + '#copy-grok'}>Grok</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band section" aria-labelledby="index-title">
+    <div class="wrap">
+      <div class="row-between" style="margin-bottom: 32px">
+        <h2 id="index-title" class="h2">01 — The index</h2>
+        <a class="btn btn-sm" href={href('patterns/')}>See all {all.length} patterns →</a>
+      </div>
+      <PatternTable patterns={latest} caption="Latest patterns" />
+    </div>
+  </section>
+
+  <section class="band section" aria-labelledby="guilds-title">
+    <div class="wrap">
+      <h2 id="guilds-title" class="h2" style="margin-bottom: 32px">02 — Guilds</h2>
+      <div class="grid-boxes">
+        {guilds.map((g) => (
+          <a class="grid-box" href={guildHref(g.id)}>
+            <span class="eyebrow">{g.code}</span>
+            <h3 class="h3" style="margin-top: 12px">{g.name}</h3>
+            <p>{g.covers}</p>
+            <p class="count">{g.count} {g.count === 1 ? 'pattern' : 'patterns'}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band band-dark section" aria-labelledby="spec-title">
+    <div class="wrap spec-grid">
+      <div>
+        <h2 id="spec-title" class="h2" style="margin-bottom: 16px">03 — The spec</h2>
+        <p class="muted" style="margin: 0">Three plain Markdown files. Skills follow the open Agent Skills standard, so they work anywhere it does.</p>
+      </div>
+      <div class="spec-box"><p class="file">PERSONA.md</p><p>Who the AI is: role, tone, boundaries.</p></div>
+      <div class="spec-box"><p class="file">SKILL.md</p><p>How to do one job, step by step.</p></div>
+      <div class="spec-box"><p class="file">AGENT.md</p><p>A ready teammate: persona + skills + starter prompts.</p></div>
+    </div>
+  </section>
+
+  <section class="band section">
+    <div class="wrap cta-row">
+      <h2>Your job has a manual nobody wrote. Write it.</h2>
+      <div class="btn-row">
+        <a class="btn btn-accent" href={href('contribute/')}>Become a Master</a>
+        <a class="btn" href={REPO_URL}>Star on GitHub</a>
+      </div>
+    </div>
+  </section>
+</Base>

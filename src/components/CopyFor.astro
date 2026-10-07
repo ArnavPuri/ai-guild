@@ -1,0 +1,113 @@
+---
+import { exportAll, type Bundle } from '../lib/exporters';
+
+interface Props {
+  bundle: Bundle;
+}
+
+const results = exportAll(Astro.props.bundle);
+---
+
+<section class="copy-for" id="copy" aria-labelledby="copy-title" data-copy-for>
+  <h2 class="panel-title" id="copy-title">Copy for…</h2>
+  <div class="tabs" role="tablist" aria-label="Choose where you will use it">
+    {results.map((r, i) => (
+      <button
+        class="tab"
+        type="button"
+        role="tab"
+        id={`tab-${r.platform}`}
+        aria-controls={`panel-${r.platform}`}
+        aria-selected={i === 0 ? 'true' : 'false'}
+        tabindex={i === 0 ? 0 : -1}
+      >{r.platformName}</button>
+    ))}
+  </div>
+  {results.map((r, i) => (
+    <div class="tabpanel" role="tabpanel" id={`panel-${r.platform}`} aria-labelledby={`tab-${r.platform}`} hidden={i !== 0}>
+      <h3>{r.platformName}</h3>
+      <ol class="steps">{r.steps.map((s) => <li>{s}</li>)}</ol>
+      {r.notes.map((n) => <p class="note">{n}</p>)}
+      {r.parts.map((part, j) => {
+        const pid = `part-${r.platform}-${j}`;
+        return (
+          <div class:list={['part', part.kind]}>
+            <div class="part-head">
+              <span class="part-label">{part.filename ?? part.label}</span>
+              <span class="btn-row" style="gap: 8px">
+                <button class="btn btn-sm" type="button" data-copy={pid}>Copy</button>
+                {part.kind === 'file' && (
+                  <button class="btn btn-sm" type="button" data-download={pid} data-filename={(part.filename ?? 'pattern.md').split('/').pop()}>Download</button>
+                )}
+              </span>
+            </div>
+            <pre id={pid} tabindex="0">{part.content}</pre>
+          </div>
+        );
+      })}
+    </div>
+  ))}
+</section>
+
+<script>
+  for (const root of document.querySelectorAll<HTMLElement>('[data-copy-for]')) {
+    const tabs = [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const select = (tab: HTMLButtonElement, focus = false) => {
+      for (const t of tabs) {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        const panel = document.getElementById(t.getAttribute('aria-controls')!);
+        if (panel) panel.hidden = !on;
+      }
+      if (focus) tab.focus();
+      history.replaceState(null, '', `#copy-${tab.id.replace('tab-', '')}`);
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => select(tab));
+      tab.addEventListener('keydown', (e) => {
+        const next = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : null;
+        if (next === null) return;
+        e.preventDefault();
+        select(tabs[(next + tabs.length) % tabs.length], true);
+      });
+    });
+    // Deep link: #copy-grok opens the Grok tab.
+    const wanted = location.hash.match(/^#copy-(\w+)/)?.[1];
+    const start = tabs.find((t) => t.id === `tab-${wanted}`);
+    if (start) {
+      select(start);
+      root.scrollIntoView();
+    }
+
+    root.addEventListener('click', async (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-copy],[data-download]');
+      if (!btn) return;
+      const id = btn.dataset.copy ?? btn.dataset.download!;
+      const text = document.getElementById(id)?.textContent ?? '';
+      if (btn.dataset.download) {
+        const url = URL.createObjectURL(new Blob([text], { type: 'text/markdown' }));
+        const a = Object.assign(document.createElement('a'), { href: url, download: btn.dataset.filename || 'pattern.md' });
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        return;
+      }
+      const label = btn.textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.textContent = 'Copied';
+      } catch {
+        const range = document.createRange();
+        range.selectNodeContents(document.getElementById(id)!);
+        getSelection()?.removeAllRanges();
+        getSelection()?.addRange(range);
+        btn.textContent = 'Press Ctrl+C';
+      }
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = label;
+        btn.classList.remove('copied');
+      }, 1600);
+    });
+  }
+</script>

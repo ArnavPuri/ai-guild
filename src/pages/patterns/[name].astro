@@ -1,0 +1,124 @@
+---
+import Base from '../../layouts/Base.astro';
+import CopyFor from '../../components/CopyFor.astro';
+import { getGuild } from '../../lib/guilds';
+import { usedBy } from '../../lib/patterns';
+import {
+  allPatterns,
+  bodyWithoutTitle,
+  bundleFor,
+  editHref,
+  guildHref,
+  href,
+  patternHref,
+  renderMarkdown,
+  sourceHref,
+  TYPE_LABEL,
+} from '../../lib/site';
+import type { Pattern } from '../../lib/schema';
+
+export function getStaticPaths() {
+  return allPatterns().map((p) => ({ params: { name: p.name }, props: { pattern: p } }));
+}
+
+const { pattern: p } = Astro.props as { pattern: Pattern };
+const all = allPatterns();
+const guild = getGuild(p.guild);
+const bundle = bundleFor(p, all);
+const parts = [bundle.persona, ...bundle.skills].filter((x): x is Pattern => Boolean(x));
+const users = p.type === 'agent' ? [] : usedBy(p, all);
+const related = all.filter((x) => x.guild === p.guild && x.name !== p.name && !parts.includes(x)).slice(0, 5);
+const bodyHtml = renderMarkdown(bodyWithoutTitle(p));
+---
+
+<Base title={p.title} description={p.description}>
+  <section class="band">
+    <div class="wrap section" style="padding-bottom: 40px">
+      <p class="eyebrow">
+        <a href={href('patterns/')}>Index</a> / <a href={guildHref(guild.id)}>{guild.name}</a> / No. {p.number}
+      </p>
+      <div class="btn-row" style="margin: 20px 0 16px; gap: 8px">
+        <span class="badge" style="background: var(--accent)">{TYPE_LABEL[p.type]}</span>
+        <span class="badge">{guild.name}' Guild</span>
+        {p.hallmark ? <span class="badge badge-ok">Hallmark · {p.hallmark}</span> : <a class="badge badge-wait" href={href('contribute/#hallmark')} style="text-decoration: none">Awaiting review</a>}
+      </div>
+      <h1 class="display" style="font-size: clamp(40px, 6vw, 72px)">{p.title}</h1>
+      <p class="lede" style="margin-top: 20px; max-width: 760px">{p.description}</p>
+    </div>
+  </section>
+
+  <div class="wrap section">
+    <div class="pattern-layout">
+      <div class="stack" style="min-width: 0">
+        <CopyFor bundle={bundle} />
+
+        <section aria-labelledby="read-title">
+          <h2 id="read-title" class="h3" style="margin: 16px 0 8px">Read the pattern</h2>
+          <p class="mono muted" style="margin: 0 0 20px; font-size: 14px">{p.path}</p>
+          <div class="prose" set:html={bodyHtml} />
+          <details class="raw">
+            <summary>Show the raw file</summary>
+            <div class="part"><pre>{p.raw}</pre></div>
+          </details>
+        </section>
+      </div>
+
+      <aside class="aside-stack" aria-label="About this pattern">
+        <section class="panel">
+          <h2 class="panel-title">Record</h2>
+          <div class="panel-body">
+            <dl class="meta">
+              <dt>No.</dt><dd>{p.number}</dd>
+              <dt>Name</dt><dd>{p.name}</dd>
+              <dt>Type</dt><dd>{TYPE_LABEL[p.type]}</dd>
+              <dt>Guild</dt><dd><a href={guildHref(guild.id)}>{guild.name}</a></dd>
+              <dt>Master</dt><dd>{p.master}</dd>
+              <dt>Hallmark</dt><dd>{p.hallmark ? `Reviewed ${p.hallmark}` : 'Awaiting review'}</dd>
+              <dt>Language</dt><dd>{p.languages.join(', ')}</dd>
+              {p.tags.length > 0 && (<><dt>Tags</dt><dd>{p.tags.join(', ')}</dd></>)}
+              <dt>Licence</dt><dd>CC BY 4.0</dd>
+            </dl>
+          </div>
+        </section>
+
+        {parts.length > 0 && (
+          <section class="panel">
+            <h2 class="panel-title">Inside this agent</h2>
+            <ul class="list-plain">
+              {parts.map((x) => (
+                <li><a href={patternHref(x)}><span>{x.title}</span><span class="mono muted">{TYPE_LABEL[x.type]}</span></a></li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {users.length > 0 && (
+          <section class="panel">
+            <h2 class="panel-title">Used by</h2>
+            <ul class="list-plain">
+              {users.map((x) => (
+                <li><a href={patternHref(x)}><span>{x.title}</span><span class="mono muted">Agent</span></a></li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {related.length > 0 && (
+          <section class="panel">
+            <h2 class="panel-title">More from {guild.name}</h2>
+            <ul class="list-plain">
+              {related.map((x) => (
+                <li><a href={patternHref(x)}><span>{x.title}</span><span class="mono muted">{x.number}</span></a></li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        <div class="btn-row">
+          <a class="btn btn-sm" href={sourceHref(p)}>View on GitHub</a>
+          <a class="btn btn-sm" href={editHref(p)}>Suggest an edit</a>
+        </div>
+      </aside>
+    </div>
+  </div>
+</Base>

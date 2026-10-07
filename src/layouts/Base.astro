@@ -1,0 +1,74 @@
+---
+import '../styles/global.css';
+import { href, REPO_URL, SITE_NAME, TAGLINE } from '../lib/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Which nav item is current. */
+  current?: 'index' | 'guilds' | 'spec' | 'contribute';
+}
+
+const { title, description = 'Copyable AI agents, skills and personas written by teachers, doctors, sellers and builders. Text-only, human-reviewed, free forever.', current } = Astro.props;
+const fullTitle = title ? `${title} — ${SITE_NAME}` : `${SITE_NAME} — ${TAGLINE}`;
+const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+
+const nav = [
+  { id: 'index', label: '01 Index', to: 'patterns/' },
+  { id: 'guilds', label: '02 Guilds', to: 'guilds/' },
+  { id: 'spec', label: '03 Spec', to: 'spec/' },
+] as const;
+---
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="theme-color" content="#f2f1ec" />
+    <link rel="icon" href={href('favicon.svg')} type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Space+Grotesk:wght@400;500;700&display=swap"
+    />
+    <script is:inline>document.documentElement.classList.replace('no-js', 'js');</script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header band">
+      <div class="wrap">
+        <a class="brand" href={href()}>
+          <span class="brand-mark" aria-hidden="true">G</span>
+          <span class="brand-name">GUILD</span>
+          <span class="brand-tag">/ open patterns for AI</span>
+        </a>
+        <nav class="nav" aria-label="Main">
+          {nav.map((n) => (
+            <a href={href(n.to)} aria-current={current === n.id ? 'page' : undefined}>{n.label}</a>
+          ))}
+          <a class="cta" href={href('contribute/')} aria-current={current === 'contribute' ? 'page' : undefined}>Contribute →</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <span>Patterns CC BY 4.0 · Code MIT · Text-only, human-reviewed</span>
+        <span><a href={REPO_URL}>Source on GitHub</a> · An ANYP Labs project</span>
+      </div>
+    </footer>
+  </body>
+</html>

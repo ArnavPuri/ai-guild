@@ -1,0 +1,50 @@
+---
+import { getGuild } from '../lib/guilds';
+import { patternHref, TYPE_LABEL } from '../lib/site';
+import type { Pattern } from '../lib/schema';
+
+interface Props {
+  patterns: Pattern[];
+  /** Hide the guild column on a single guild's page. */
+  showGuild?: boolean;
+  caption: string;
+  id?: string;
+}
+
+const { patterns, showGuild = true, caption, id } = Astro.props;
+---
+
+<div class="table-box">
+  <table class="index" id={id}>
+    <caption class="sr-only">{caption}</caption>
+    <thead>
+      <tr>
+        <th scope="col">No.</th>
+        <th scope="col">Pattern</th>
+        {showGuild && <th scope="col">Guild</th>}
+        <th scope="col">Type</th>
+        <th scope="col">Review</th>
+        <th scope="col"><span class="sr-only">Open</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {patterns.map((p) => (
+        <tr
+          data-type={p.type}
+          data-guild={p.guild}
+          data-search={[p.number, p.title, p.description, p.guild, p.type, ...p.tags].join(' ').toLowerCase()}
+        >
+          <td class="num">{p.number}</td>
+          <td class="title">
+            <a href={patternHref(p)}>{p.title}</a>
+            <span class="desc">{p.description}</span>
+          </td>
+          {showGuild && <td class="guild-cell">{getGuild(p.guild).name}</td>}
+          <td class="type">{TYPE_LABEL[p.type].toUpperCase()}</td>
+          <td class="review">{p.hallmark ? <span class="badge badge-ok">Hallmark</span> : <span class="badge badge-wait">Pending</span>}</td>
+          <td class="act"><a class="btn btn-sm" href={patternHref(p) + '#copy'} aria-label={`Copy ${p.title}`}>Copy</a></td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

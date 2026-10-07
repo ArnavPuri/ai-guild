@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro';
+import { href } from '../lib/site';
+---
+
+<Base title="Not found">
+  <section class="section">
+    <div class="wrap">
+      <p class="eyebrow">Error 404</p>
+      <h1 class="display" style="margin: 12px 0 20px">No pattern on this page.</h1>
+      <p class="lede">It may have been renamed. The index has everything.</p>
+      <div class="btn-row" style="margin-top: 32px">
+        <a class="btn btn-accent" href={href('patterns/')}>Open the index</a>
+        <a class="btn" href={href()}>Home</a>
+      </div>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,79 @@
+---
+import Base from '../layouts/Base.astro';
+import { allPatterns, href, patternHref, REPO_URL } from '../lib/site';
+
+const all = allPatterns();
+const example = all.find((p) => p.type === 'agent')!;
+const exampleSkill = all.find((p) => p.type === 'skill')!;
+const head = (raw: string) => raw.split('\n---')[0] + '\n---';
+---
+
+<Base title="The spec" description="The Guild pattern format: three plain Markdown files. Skills follow the open Agent Skills standard." current="spec">
+  <section class="band band-dark section">
+    <div class="wrap">
+      <p class="eyebrow">03 — The spec</p>
+      <h1 class="display" style="margin: 12px 0 20px; font-size: clamp(40px, 6vw, 72px)">Three files. Plain Markdown.</h1>
+      <p class="lede" style="color: #c9c7bf">No accounts, no lock-in, no code. A pattern is a folder with one Markdown file in it. Skills are valid Agent Skills, so any tool that reads SKILL.md can use them as they are.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap prose" style="max-width: 860px">
+      <h2>Where patterns live</h2>
+      <pre><code>patterns/
+  teachers/
+    classroom-co-teacher/AGENT.md
+    patient-primary-teacher/PERSONA.md
+    lesson-plan-from-syllabus/SKILL.md</code></pre>
+      <p>The folder name is the pattern's <code>name</code>. The first folder is its guild. The file name says what kind of pattern it is.</p>
+
+      <h2>The three kinds</h2>
+      <table>
+        <thead><tr><th>File</th><th>What it is</th><th>Must include</th></tr></thead>
+        <tbody>
+          <tr><td><code>PERSONA.md</code></td><td>Who the AI is: role, tone, how it works, what it never does.</td><td>Healers' Guild: a <code>## Boundaries</code> section</td></tr>
+          <tr><td><code>SKILL.md</code></td><td>How to do one job, step by step.</td><td>A <code>## Steps</code> section</td></tr>
+          <tr><td><code>AGENT.md</code></td><td>A ready teammate: one persona, one or more skills, and starter prompts.</td><td><code>metadata.persona</code>, <code>metadata.skills</code>, and 3+ lines under <code>## Try saying</code></td></tr>
+        </tbody>
+      </table>
+
+      <h2>Frontmatter</h2>
+      <p>The same for all three kinds. <code>name</code>, <code>description</code> and <code>license</code> are Agent Skills fields; everything Guild adds sits under <code>metadata</code> as plain strings, which keeps every SKILL.md valid under the standard.</p>
+      <pre><code>{head(example.raw)}</code></pre>
+
+      <table>
+        <thead><tr><th>Field</th><th>Rule</th></tr></thead>
+        <tbody>
+          <tr><td><code>name</code></td><td>Lowercase letters, digits and hyphens. Same as the folder. Max 64 characters.</td></tr>
+          <tr><td><code>description</code></td><td>What it does and when to use it. 20 to 1,024 characters.</td></tr>
+          <tr><td><code>license</code></td><td>Always <code>CC-BY-4.0</code>.</td></tr>
+          <tr><td><code>metadata.number</code></td><td>Four digits, unique. Take the next free number.</td></tr>
+          <tr><td><code>metadata.title</code></td><td>The display name, max 60 characters.</td></tr>
+          <tr><td><code>metadata.guild</code></td><td>One of: teachers, healers, builders, makers, merchants, heralds.</td></tr>
+          <tr><td><code>metadata.master</code></td><td>Who wrote it. Your name or handle.</td></tr>
+          <tr><td><code>metadata.hallmark</code></td><td>Leave empty. Reviewers set it to the review month (YYYY-MM).</td></tr>
+          <tr><td><code>metadata.tags</code>, <code>languages</code></td><td>Comma-separated. Languages default to <code>en</code>.</td></tr>
+          <tr><td><code>metadata.persona</code>, <code>skills</code></td><td>Agents only. Names of existing patterns.</td></tr>
+        </tbody>
+      </table>
+
+      <h2>A skill, in full</h2>
+      <p>See <a href={patternHref(exampleSkill)}>{exampleSkill.title}</a>. Recommended sections: <code>## Ask first</code>, <code>## Steps</code>, <code>## Output</code>, <code>## Check before replying</code>.</p>
+
+      <h2>What the checker refuses</h2>
+      <p>Patterns are text that people paste into an AI with access to their work, so every pull request is checked automatically. A pattern is refused if it contains:</p>
+      <ul>
+        <li>web links, webhooks, or download commands;</li>
+        <li>install or shell commands;</li>
+        <li>reads of environment variables, keys or tokens;</li>
+        <li>attempts to override other instructions;</li>
+        <li>invisible or direction-changing Unicode characters, or long encoded blobs;</li>
+        <li>HTML, or any file other than the one Markdown file.</li>
+      </ul>
+      <p>Then two people read it before it earns the Hallmark. See <a href={href('contribute/#hallmark')}>the Hallmark checklist</a>.</p>
+
+      <h2>Machine-readable index</h2>
+      <p>Every pattern is listed at <a href={href('patterns.json')}><code>/patterns.json</code></a>, and the source files are in the <a href={REPO_URL}>GitHub repo</a>.</p>
+    </div>
+  </section>
+</Base>
