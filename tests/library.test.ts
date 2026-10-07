@@ -26,7 +26,8 @@ describe('seed library', () => {
   it('resolves agents to their persona and skills', () => {
     const r = resolveAgent(all.find((p) => p.name === 'classroom-co-teacher')!, all);
     expect(r.persona?.name).toBe('patient-primary-teacher');
-    expect(r.skills.map((s) => s.name)).toEqual(['lesson-plan-from-syllabus', 'parent-email-after-test', 'differentiate-worksheet']);
+    expect(r.skills.map((s) => s.name)).toEqual(r.agent.skills);
+    expect(r.skills[0].name).toBe('lesson-plan-from-syllabus');
   });
 });
 

@@ -27,6 +27,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # Fails early with a clear message if Pages is not enabled for the repo.
+      - uses: actions/configure-pages@v5
       - run: npm ci
       - run: npm run build
         env:
