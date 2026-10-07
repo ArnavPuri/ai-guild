@@ -45,6 +45,8 @@ export const UNSAFE_RULES: { id: string; re: RegExp; message: string }[] = [
 ];
 
 const ALLOWED_FILES = new Set(Object.values(FILE_FOR_TYPE));
+/** Names that would collide with site files (og/default.png). */
+const RESERVED_NAMES = new Set(['default']);
 
 export interface FolderInfo {
   dir: string;
@@ -97,6 +99,7 @@ export function lintLibrary(all: Pattern[]): Issue[] {
   const seenNumber = new Map<string, Pattern>();
   const seenName = new Map<string, Pattern>();
   for (const p of all) {
+    if (RESERVED_NAMES.has(p.name)) issues.push({ level: 'error', path: p.path, message: `"${p.name}" is a reserved name` });
     const n = seenNumber.get(p.number);
     if (n) issues.push({ level: 'error', path: p.path, message: `number ${p.number} is already used by ${n.path}` });
     else seenNumber.set(p.number, p);

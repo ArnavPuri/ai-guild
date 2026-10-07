@@ -7,11 +7,22 @@ interface Props {
   description?: string;
   /** Which nav item is current. */
   current?: 'index' | 'guilds' | 'spec' | 'contribute';
+  /** Share card, as a site path such as "og/classroom-co-teacher.png". */
+  image?: string;
+  imageAlt?: string;
 }
 
-const { title, description = 'Copyable AI agents, skills and personas written by teachers, doctors, sellers and builders. Text-only, human-reviewed, free forever.', current } = Astro.props;
+const {
+  title,
+  description = 'Copyable AI agents, skills and personas written by teachers, doctors, sellers and builders. Text-only, human-reviewed, free forever.',
+  current,
+  image = 'og/default.png',
+  imageAlt = 'Guild: hire an AI that already knows your job.',
+} = Astro.props;
 const fullTitle = title ? `${title} — ${SITE_NAME}` : `${SITE_NAME} — ${TAGLINE}`;
 const canonical = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+// Social sites need an absolute image URL; without SITE set (local dev) a site-relative path is used.
+const imageUrl = Astro.site ? new URL(href(image), Astro.site).href : href(image);
 
 const nav = [
   { id: 'index', label: '01 Index', to: 'patterns/' },
@@ -31,7 +42,17 @@ const nav = [
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:site_name" content="Guild" />
+    {canonical && <meta property="og:url" content={canonical} />}
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+    <meta name="twitter:image:alt" content={imageAlt} />
     <meta name="theme-color" content="#f2f1ec" />
     <link rel="icon" href={href('favicon.svg')} type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

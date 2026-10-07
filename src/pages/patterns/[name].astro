@@ -31,7 +31,7 @@ const related = all.filter((x) => x.guild === p.guild && x.name !== p.name && !p
 const bodyHtml = renderMarkdown(bodyWithoutTitle(p));
 ---
 
-<Base title={p.title} description={p.description}>
+<Base title={p.title} description={p.description} image={`og/${p.name}.png`} imageAlt={`${p.title}: a ${TYPE_LABEL[p.type].toLowerCase()} pattern from the ${guild.name}' Guild`}>
   <section class="band">
     <div class="wrap section" style="padding-bottom: 40px">
       <p class="eyebrow">

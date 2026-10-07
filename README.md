@@ -54,6 +54,7 @@ patterns/<guild>/<name>/   one folder per pattern, one Markdown file inside
 src/lib/schema.ts          frontmatter rules
 src/lib/lint.ts            safety and structure checks
 src/lib/exporters.ts       "Copy for…" output for each platform
+src/lib/og.ts              share cards (1200×630 PNG per pattern, built at /og/<name>.png)
 src/pages/                 the site
 scripts/check-patterns.ts  the checker CI runs
 ```
